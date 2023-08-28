@@ -55,11 +55,19 @@ if (newDate >= new Date(2020, 8, 10)) {
 
 There'a [project](https://github.com/Marvin-Cypher/pha_distribution) for detailed $PHA token halving graph.
 
+The "Real" compute tokenomic launch on both Khala & Phala
+
 - Start with an initial daily reward of 720k on 2022-04-08. 
 - After each 180 days, reduce the daily reward by 25%.
 - Continue until the daily reward becomes negligible or virtually 0
+- [Source](https://khala.subsquare.io/democracy/referenda/27)
 
-[Source](https://khala.subsquare.io/democracy/referenda/27)
+The "canary" computate tokenomic launch on Khala
+
+- Start with an initial daily reward of 60k on 2021-09-20.
+- After each 45 days, reduce the daily reward by 25%.
+- Continue until the data 2022-04-08
+- [Source](https://medium.com/phala-network/reading-phala-network-economic-paper-preview-5f33b7019861)
 
 Compute "Halving" Data
 ```javascript
@@ -125,9 +133,29 @@ for (let day = 1; day <= 365; day++) {
 Processing data since 2022-04-08
 
 ```javascript
- if (newDate >= new Date(2022, 3, 8)) {
+    if (newDate >= new Date(2021, 8, 20) && newDate <= new Date(2022, 3, 8)) {
+        console.log("Special reward computation for date: ", newDate);
+        const startSpecialDate = new Date(2021, 8, 20);
+        let dayDifference = Math.floor((newDate - startSpecialDate) / (1000 * 60 * 60 * 24)); 
+
+        let dailyReward = 60000;
+        for (let day = 0; day <= dayDifference; day++) {
+            let rewardReductionPeriods = Math.floor(day / 45); 
+            let currentDayReward = dailyReward;
+            for (let j = 0; j < rewardReductionPeriods; j++) {
+                currentDayReward *= 0.75; // Reduce reward by 25% for each 45-day period
+            }
+            cumulativeSpecialReward += currentDayReward;
+        }
+        
+        datum["Compute Reward"] = cumulativeSpecialReward;
+        cumulativeSpecialReward = 0;  // Reset for the next iteration
+    } else if (newDate >= new Date(2022, 3, 8)) {
+        console.log("Original reward computation for date: ", newDate);
         let dayDiff = Math.floor((newDate - new Date(2022, 3, 8)) / (1000 * 60 * 60 * 24));
         datum["Compute Reward"] = computeCumulative(dayDiff, halvingPeriod, halvingDiscount);
+    } else {
+        datum["Compute Reward"] = 0;
     }
 ```
 #### 3. **Stakedrop**
