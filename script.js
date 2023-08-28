@@ -98,6 +98,7 @@ function inspectDataForNaN(stackedData) {
 }
 
 
+
 // Test the functions together
 for (let day = 1; day <= 365; day++) { 
     let dailyReward;
@@ -109,21 +110,40 @@ for (let day = 1; day <= 365; day++) {
 // 2. Generate processed data
 
 const data = [];
+let cumulativeSpecialReward = 0;
 for (let i = 0; i < 120; i++) {
     let newDate = new Date(2020, 8, 10);
     newDate.setMonth(newDate.getMonth() + i);
-    
     let datum = { date: newDate };
 
 
     // Computation reward
-    datum["Compute Reward"] = 0;
-    if (newDate >= new Date(2022, 3, 8)) {
+    if (newDate >= new Date(2021, 8, 20) && newDate <= new Date(2022, 3, 8)) {
+        console.log("Special reward computation for date: ", newDate);
+        const startSpecialDate = new Date(2021, 8, 20);
+        let dayDifference = Math.floor((newDate - startSpecialDate) / (1000 * 60 * 60 * 24)); 
+
+        let dailyReward = 60000;
+        for (let day = 0; day <= dayDifference; day++) {
+            let rewardReductionPeriods = Math.floor(day / 45); 
+            let currentDayReward = dailyReward;
+            for (let j = 0; j < rewardReductionPeriods; j++) {
+                currentDayReward *= 0.75; // Reduce reward by 25% for each 45-day period
+            }
+            cumulativeSpecialReward += currentDayReward;
+        }
+        
+        datum["Compute Reward"] = cumulativeSpecialReward;
+        cumulativeSpecialReward = 0;  // Reset for the next iteration
+    } else if (newDate >= new Date(2022, 3, 8)) {
+        console.log("Original reward computation for date: ", newDate);
         let dayDiff = Math.floor((newDate - new Date(2022, 3, 8)) / (1000 * 60 * 60 * 24));
         datum["Compute Reward"] = computeCumulative(dayDiff, halvingPeriod, halvingDiscount);
+    } else {
+        datum["Compute Reward"] = 0;
     }
-
     data.push(datum);
+
 
     // Stakedrop
     datum["Stakedrop"] = 0;
@@ -133,9 +153,9 @@ for (let i = 0; i < 120; i++) {
 
     // Testnet Incentive
     datum["Testnet Reward"] = 0;
-    if (newDate >= new Date(2021, 5, 30)) {
+   if (newDate >= new Date(2021, 5, 30)) {
         datum["Testnet Reward"] = RATIOS["Testnet Reward"] * TOTAL_SUPPLY;
-    }
+    } 
 
     // Private Sale
 
@@ -207,6 +227,7 @@ for (let i = 0; i < 120; i++) {
     }
 }
 }
+
 
 
 // log 
@@ -396,4 +417,3 @@ legend.append('text')
 */
 
 // Debugging logs (Optional)
-
